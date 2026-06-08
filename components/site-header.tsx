@@ -21,7 +21,12 @@ export function SiteHeader() {
           <a className="history-link" href="/history">生成历史</a>
           {status === "authenticated" ? (
             <>
-              {session.user.isAdmin ? <a className="history-link" href="/admin/users">账号管理</a> : null}
+              {session.user.isAdmin ? (
+                <>
+                  <a className="history-link" href="/admin/users">账号管理</a>
+                  <a className="history-link" href="/admin/ai-config">AI 检测</a>
+                </>
+              ) : null}
               <span className="site-user">{session.user.name || session.user.email}</span>
               <button className="ghost-button" type="button" onClick={() => signOut({ callbackUrl: "/" })}>
                 退出
