@@ -390,6 +390,16 @@ button:disabled {
   resize: vertical;
 }
 
+.status-note {
+  padding: 12px 14px;
+  border: 1px solid rgba(37, 99, 235, 0.18);
+  border-radius: var(--radius);
+  color: #274060;
+  background: #f2f7ff;
+  font-size: 0.9rem;
+  line-height: 1.6;
+}
+
 .duties-list {
   display: grid;
   gap: 10px;

@@ -7,25 +7,33 @@ type RequestConfig = {
 
 export function resolveAiConfig(requestConfig?: RequestConfig) {
   const runtimeConfig = sanitizeRuntimeConfig(requestConfig?.runtimeConfig);
-
-  if (runtimeConfig.apiKey) {
-    return runtimeConfig;
-  }
-
   const envProvider = (process.env.AI_PROVIDER as AiProvider | undefined) === "deepseek" ? "deepseek" : "openai";
 
-  if (envProvider === "deepseek") {
+  const hostedConfig =
+    envProvider === "deepseek"
+      ? {
+          provider: "deepseek" as const,
+          apiKey: process.env.DEEPSEEK_API_KEY?.trim() || "",
+          model: process.env.DEEPSEEK_MODEL?.trim() || getDefaultModel("deepseek")
+        }
+      : {
+          provider: "openai" as const,
+          apiKey: process.env.OPENAI_API_KEY?.trim() || "",
+          model: process.env.OPENAI_MODEL?.trim() || getDefaultModel("openai")
+        };
+
+  if (runtimeConfig.mode === "personal" && runtimeConfig.apiKey) {
     return {
-      provider: "deepseek" as const,
-      apiKey: process.env.DEEPSEEK_API_KEY?.trim() || "",
-      model: process.env.DEEPSEEK_MODEL?.trim() || getDefaultModel("deepseek")
+      provider: runtimeConfig.provider,
+      apiKey: runtimeConfig.apiKey,
+      model: runtimeConfig.model || getDefaultModel(runtimeConfig.provider),
+      source: "personal" as const
     };
   }
 
   return {
-    provider: "openai" as const,
-    apiKey: process.env.OPENAI_API_KEY?.trim() || "",
-    model: process.env.OPENAI_MODEL?.trim() || getDefaultModel("openai")
+    ...hostedConfig,
+    source: "hosted" as const
   };
 }
 
