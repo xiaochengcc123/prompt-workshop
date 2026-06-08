@@ -1,0 +1,87 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Job {
+  id         String      @id @default(cuid())
+  key        String      @unique
+  name       String
+  icon       String
+  duties     Duty[]
+  promptRuns PromptRun[]
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @updatedAt
+}
+
+model Duty {
+  id         String      @id @default(cuid())
+  title      String
+  text       String
+  hint       String
+  source     DutySource  @default(SEED)
+  jobId      String
+  job        Job         @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  promptRuns PromptRun[]
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @updatedAt
+
+  @@index([jobId])
+}
+
+model User {
+  id           String      @id @default(cuid())
+  name         String?
+  email        String      @unique
+  passwordHash String
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+  promptRuns   PromptRun[]
+  favorites    Favorite[]
+}
+
+model Favorite {
+  id        String   @id @default(cuid())
+  title     String
+  prompt    String
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, prompt])
+  @@index([userId, createdAt])
+}
+
+model PromptRun {
+  id         String    @id @default(cuid())
+  roleName   String
+  dutyTitle  String
+  dutyText   String
+  hint       String?
+  prompt     String
+  plan       String?
+  provider   String?
+  model      String?
+  jobId      String?
+  dutyId     String?
+  userId     String?
+  job        Job?      @relation(fields: [jobId], references: [id], onDelete: SetNull)
+  duty       Duty?     @relation(fields: [dutyId], references: [id], onDelete: SetNull)
+  user       User?     @relation(fields: [userId], references: [id], onDelete: SetNull)
+  createdAt  DateTime  @default(now())
+
+  @@index([jobId])
+  @@index([dutyId])
+  @@index([userId])
+  @@index([createdAt])
+}
+
+enum DutySource {
+  SEED
+  CUSTOM
+}
